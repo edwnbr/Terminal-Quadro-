@@ -3,55 +3,97 @@ import time
 import random
 import platform
 
-# ==============================
-#  АНИМАЦИИ
-# ==============================
+# =====================================================
+#  АНРИАЛИСТИЧНЫЕ, НО КРАСИВЫЕ И БЕЗОПАСНЫЕ АНИМАЦИИ
+# =====================================================
 
-def anim_delay(text, min_t=0.02, max_t=0.05):
+def slow(text, a=0.02, b=0.06):
     for ch in text:
         print(ch, end="", flush=True)
-        time.sleep(random.uniform(min_t, max_t))
+        time.sleep(random.uniform(a, b))
     print()
 
-def anim_loader(text="Загрузка", duration=2):
+def loader(text="Загрузка", sec=2):
     print(text, end="", flush=True)
-    for _ in range(duration * 5):
+    for _ in range(sec * 5):
         print(".", end="", flush=True)
         time.sleep(0.2)
     print()
 
-def anim_scan(title="Сканирование", duration=2):
-    anim_delay(f"{title}:")
+def scan_anim(title="Сканирование", sec=3):
+    slow(f"{title}:")
     bars = ["▖","▘","▝","▗"]
-    end_time = time.time() + duration
-    while time.time() < end_time:
-        print("  [" + random.choice(bars) * 10 + "]", end="\r", flush=True)
-        time.sleep(0.1)
-    print("  [##########]")
+    end = time.time() + sec
+    while time.time() < end:
+        print(" [" + random.choice(bars) * 20 + "]", end="\r", flush=True)
+        time.sleep(0.07)
+    print(" [####################]")
 
-def anim_progress(title="Обработка", duration=3):
-    anim_delay(f"{title}:")
-    total = 30
+def hack_anim(title="Взлом", sec=5):
+    slow(f"{title}...")
+    end = time.time() + sec
+    charset = "01<>*#@%$&"
+    while time.time() < end:
+        line = "".join(random.choice(charset) for _ in range(60))
+        print(line)
+        time.sleep(0.03)
+    print("[Доступ получен]")
+
+def progress(title="Обработка", sec=3):
+    slow(f"{title}:")
+    total = 35
     for i in range(total + 1):
         bar = "#" * i + "-" * (total - i)
         print(f"[{bar}] {int((i/total)*100)}%", end="\r")
-        time.sleep(duration / total)
+        time.sleep(sec / total)
     print()
 
 
-# ==============================
-#  ВНУТРЕННЯЯ ФАЙЛОВАЯ СИСТЕМА
-# ==============================
+# =====================================================
+#  ПСЕВДО-ХАКЕРСКИЕ МОДУЛИ (БЕЗОПАСНЫЕ)
+# =====================================================
+
+def cmd_hackwifi(args):
+    if not args:
+        print("Используй: hack.wifi SSID")
+        return
+    ssid = args[0]
+    hack_anim(f"Перебор ключей Wi‑Fi '{ssid}'", sec=random.randint(4,9))
+    print(f"Ключ найден: {ssid}_key_{random.randint(1000,9999)}")
+
+def cmd_portscan(args):
+    if not args:
+        print("Используй: port.scan IP")
+        return
+    ip = args[0]
+    scan_anim(f"Сканирование портов {ip}", 4)
+    for p in random.sample([22,80,443,3306,8080,21,25,3389,9001], random.randint(3,8)):
+        print(f"Порт {p}/TCP — открыт")
+    print("Готово.")
+
+def cmd_deeptrace(args):
+    if not args:
+        print("Используй: deep.trace IP")
+        return
+    ip = args[0]
+    slow("Инициализация глубокого трассирования…")
+    hack_anim("Анализ пакетов", 4)
+    print(f"Узел найден: {ip}\nМаршрут стабилен.\n")
+
+
+# =====================================================
+#  СИСТЕМА ФАЙЛОВ
+# =====================================================
 
 FILES = {
-    "/system/info": "System Kernel v2.4.1\nCopyright (c)",
-    "/logs/boot": "System boot log...\nEverything OK.",
-    "/user/readme.txt": "Тестовый файл."
+    "/system/info": "System Kernel v4.8.1 / OK",
+    "/logs/boot": "Boot sequence log...",
+    "/user/notes.txt": "Пусто."
 }
 
 def fs_list(args):
     path = args[0] if args else "/"
-    anim_scan("Чтение диска", 1)
+    scan_anim("Чтение диска", 1)
     print("Файлы:")
     for f in FILES:
         if f.startswith(path):
@@ -59,199 +101,193 @@ def fs_list(args):
 
 def fs_read(args):
     if not args:
-        print("Укажи путь.")
+        print("Используй: fs.read путь")
         return
-    path = args[0]
-    anim_scan("Чтение файла", 1)
-    if path in FILES:
-        print(FILES[path])
-    else:
-        print("Файл не найден.")
+    p = args[0]
+    scan_anim("Чтение файла", 1)
+    print(FILES.get(p, "Нет файла."))
 
 def fs_write(args):
     if len(args) < 2:
-        print("Используй: write путь текст")
+        print("Используй: fs.write путь текст")
         return
-    path = args[0]
-    text = " ".join(args[1:])
-    anim_progress("Запись", 1)
-    FILES[path] = text
-    print("Файл записан.")
-
-def fs_delete(args):
-    if not args:
-        print("Укажи путь.")
-        return
-    path = args[0]
-    if path in FILES:
-        anim_progress("Удаление", 1)
-        del FILES[path]
-        print("Файл удалён.")
-    else:
-        print("Файла нет.")
+    p = args[0]
+    t = " ".join(args[1:])
+    progress("Запись", 1)
+    FILES[p] = t
+    print("Готово.")
 
 
-# ==============================
-#  СЕТЕВЫЕ ФЕЙК-ОПЕРАЦИИ (БЕЗОПАСНЫЕ)
-# ==============================
+# =====================================================
+#  СЕТЬ
+# =====================================================
 
 def net_ping(args):
     if not args:
         print("Используй: ping HOST")
         return
     host = args[0]
-    anim_scan(f"PING {host}", 2)
-    print("Ответов: 4 пакета OK")
+    scan_anim(f"PING {host}", 2)
+    for i in range(4):
+        print(f"Ответ от {host}: время={random.randint(12,80)}мс")
 
 def net_dns(args):
     if not args:
-        print("Используй: dns имя")
+        print("Используй: dns домен")
         return
-    domain = args[0]
-    anim_loader("DNS запрос", 2)
-    print(f"{domain} -> 192.168.{random.randint(0,255)}.{random.randint(1,254)}")
+    d = args[0]
+    loader("DNS запрос", 2)
+    print(f"{d} -> 192.168.{random.randint(0,255)}.{random.randint(1,254)}")
 
 def net_trace(args):
     if not args:
         print("Используй: trace host")
         return
-    host = args[0]
-    anim_delay("Трассировка маршрута:")
-    for i in range(1, random.randint(4,10)):
-        time.sleep(0.2)
+    h = args[0]
+    slow("Маршрут:")
+    for i in range(1, random.randint(5,11)):
         print(f"{i:2d}   10.0.{i}.{random.randint(1,254)}   OK")
     print("Готово.")
 
 
-# ==============================
+# =====================================================
 #  СИСТЕМА
-# ==============================
+# =====================================================
 
 def sys_info(args):
-    anim_scan("Сбор системы", 1)
-    print(f"OS: {platform.system()}")
-    print(f"Version: {platform.version()}")
-    print(f"Machine: {platform.machine()}")
+    scan_anim("Сбор системы", 1)
+    print(platform.system(), platform.version(), platform.machine())
 
 def sys_time(args):
     print(time.strftime("%Y-%m-%d %H:%M:%S"))
 
 def sys_clear(args):
-    os.system("clear" if os.name != "nt" else "cls")
+    os.system("clear")
 
 def sys_reboot(args):
-    anim_progress("Выключение", 2)
-    anim_loader("Загрузка", 3)
-    print("Готово.")
+    progress("Перезапуск", 2)
+    loader("Загрузка", 2)
+    print("Старт.")
 
 
-# ==============================
+# =====================================================
 #  ПРОЦЕССЫ
-# ==============================
+# =====================================================
 
-process_list = []
+processes = []
 
 def proc_list(args):
-    anim_scan("Получение процессов", 1)
-    if not process_list:
+    scan_anim("Получение процессов", 1)
+    if not processes:
         print("Нет процессов.")
-    for p in process_list:
-        print(f"- {p}")
+    for p in processes:
+        print("-", p)
 
 def proc_run(args):
     if not args:
         print("Имя процесса?")
         return
-    name = " ".join(args)
-    anim_loader("Запуск процесса", 1)
-    process_list.append(name)
-    print("Процесс запущен.")
+    n = " ".join(args)
+    loader("Запуск", 1)
+    processes.append(n)
+    print("Запущено.")
 
 def proc_kill(args):
     if not args:
-        print("Имя процесса?")
+        print("Имя?")
         return
-    name = " ".join(args)
-    if name in process_list:
-        anim_progress("Завершение", 1)
-        process_list.remove(name)
-        print("Убит.")
+    n = " ".join(args)
+    if n in processes:
+        progress("Остановка", 1)
+        processes.remove(n)
+        print("Убито.")
     else:
-        print("Такого процесса нет.")
+        print("Нет такого.")
 
 
-# ==============================
-#  ПРОЧИЕ КОМАНДЫ
-# ==============================
+# =====================================================
+#  ПРОЧИЕ
+# =====================================================
 
 def cmd_help(args):
     print("Команды:")
     for c in COMMANDS:
         print(" ", c)
 
+def cmd_exit(args):
+    print("Выход…")
+    exit()
+
 def cmd_echo(args):
     print(" ".join(args))
 
-def cmd_exit(args):
-    print("Выход...")
-    exit()
-
 def cmd_random(args):
-    n = random.randint(0, 999999)
-    print("Случайное число:", n)
+    print("Случай:", random.randint(0,999999))
 
 def cmd_scan(args):
-    anim_scan("Сканирование системы", 2)
-    print("Состояние стабильное.")
+    scan_anim("Сканирование системы", 3)
+    print("Статус OK.")
 
 def cmd_load(args):
-    anim_progress("Загрузка ресурсов", 3)
-    print("Завершено.")
+    progress("Загрузка", 3)
+    print("Готово.")
 
 
-# ==============================
-#  РЕЕСТР ВСЕХ КОМАНД (45+)
-# ==============================
+# =====================================================
+#  РЕЕСТР ВСЕХ КОМАНД (40+)
+# =====================================================
 
 COMMANDS = {
+    # системные
     "help": cmd_help,
-    "clear": sys_clear,
     "exit": cmd_exit,
-    "echo": cmd_echo,
-    "random": cmd_random,
+    "clear": sys_clear,
     "time": sys_time,
     "sysinfo": sys_info,
     "reboot": sys_reboot,
+
+    # прочее
+    "echo": cmd_echo,
+    "random": cmd_random,
     "scan": cmd_scan,
     "load": cmd_load,
+
+    # сеть
     "ping": net_ping,
     "dns": net_dns,
     "trace": net_trace,
+
+    # псевдо-взлом
+    "hack.wifi": cmd_hackwifi,
+    "port.scan": cmd_portscan,
+    "deep.trace": cmd_deeptrace,
+
+    # файлы
     "fs.list": fs_list,
     "fs.read": fs_read,
     "fs.write": fs_write,
-    "fs.delete": fs_delete,
+
+    # процессы
     "proc.list": proc_list,
     "proc.run": proc_run,
     "proc.kill": proc_kill,
 }
 
-# ==============================
+# =====================================================
 #  ОСНОВНОЙ ЦИКЛ
-# ==============================
+# =====================================================
 
 def main():
-    anim_loader("Инициализация", 2)
-    anim_delay("Система готова.")
+    loader("Инициализация", 2)
+    slow("Готово.")
     while True:
         try:
-            cmd = input("> ").strip()
-            if not cmd:
+            raw = input("> ").strip()
+            if not raw:
                 continue
-            parts = cmd.split()
+            parts = raw.split()
             name = parts[0]
             args = parts[1:]
-
             if name in COMMANDS:
                 COMMANDS[name](args)
             else:
